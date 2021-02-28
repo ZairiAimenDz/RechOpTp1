@@ -1,14 +1,35 @@
 ﻿using Classes;
 using System;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace RechOpTp1
 {
+    /// <summary>
+    /// Allows Us To Use The Console With A GUI Interface
+    /// </summary>
+    internal static class NativeMethods
+    {
+        [DllImport("kernel32.dll")]
+        internal static extern Boolean AllocConsole();
+    }
+
+
     class Program
     {
+        /// <summary>
+        /// Graph Drawing Requirements
+        /// </summary>
+       
+        static Microsoft.Msagl.GraphViewerGdi.GViewer viewer = new Microsoft.Msagl.GraphViewerGdi.GViewer();
+        static Microsoft.Msagl.Drawing.Graph graph = new Microsoft.Msagl.Drawing.Graph("graph");
+        [STAThread]
         static void Main(string[] args)
         {
+
             while (true)
             {
+                NativeMethods.AllocConsole();
                 Console.WriteLine("Ecrire Le Type De Matrice : \n1 - Adjacence \n2 - Incidence");
                 var key = Console.ReadKey();
                 Console.WriteLine();
@@ -22,9 +43,25 @@ namespace RechOpTp1
                         break;
                     default: continue;
                 }
+
+
+
+                /// Code From The Graph Drawing Library
+                Form form= new Form();
+                viewer.Graph = graph;
+                //associate the viewer with the form 
+                form.SuspendLayout();
+                viewer.Dock = System.Windows.Forms.DockStyle.Fill;
+                form.Controls.Add(viewer);
+                form.ResumeLayout();
+                //show the form 
+                Application.EnableVisualStyles();
+                Application.Run(form);
+
                 break;
             }
             Console.WriteLine("Fin !");
+
         }
 
         public static void MatriceIncidence()
@@ -45,6 +82,7 @@ namespace RechOpTp1
                         break;
                     case '2':
                         typegraph = TypeDeGraph.NonOriente;
+                        graph.Directed = false;
                         break;
                     default: continue;
                 }
@@ -99,6 +137,7 @@ namespace RechOpTp1
                     if (a < 1 || b < 1)
                         continue;
                     matrice.AddArc(a,arc, b);
+                    graph.AddEdge(a.ToString(), arc.ToString(), b.ToString());
                 }
                 catch
                 {
@@ -107,6 +146,7 @@ namespace RechOpTp1
                 }
             }
             matrice.AffichierMatrice();
+            Console.Read();
         }
 
         public static void MatriceAdjacence()
@@ -126,6 +166,7 @@ namespace RechOpTp1
                         break;
                     case '2':
                         typegraph = TypeDeGraph.NonOriente;
+                        graph.Directed = false;
                         break;
                     default: continue;
                 }
@@ -148,7 +189,7 @@ namespace RechOpTp1
                 break;
             }
             matrice = new MatriceAdjacence(nbrelt, typegraph);
-            Console.WriteLine("Ecrire Les Arcs / Aretes De Formes : x,y ou x,y ⊂ [1..nbr de noeuds] et x sommet de depart - y sommet d arrivee , Pour Finir Ecrire \"fin\"");
+            Console.WriteLine("Ecrire Les Arcs / Aretes De Formes : x,y  / ou y,x inclut dans [1..nbr de noeuds] et x sommet de depart - y sommet d arrivee , Pour Finir Ecrire \"fin\"");
             while (true)
             {
                 Console.Write("Arc : ");
@@ -163,6 +204,8 @@ namespace RechOpTp1
                     if (a < 1 || b < 1)
                         continue;
                     matrice.AddArc(a, b);
+                    graph.AddEdge(a.ToString(), b.ToString());
+                    
                 }
                 catch
                 {
@@ -171,6 +214,8 @@ namespace RechOpTp1
                 }
             }
             matrice.AffichierMatrice();
+
+            Console.Read();
         }
     }
 }
